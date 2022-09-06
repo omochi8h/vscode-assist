@@ -4,3 +4,4 @@ node_modules
 .vscode-test/
 *.vsix
 assist.sqlite3
+.package-lock.json
