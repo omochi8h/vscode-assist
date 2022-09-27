@@ -72,7 +72,25 @@ export function activate(context: vscode.ExtensionContext) {
 
 			db.serialize(() => {
 
-				db.run("insert into student(student_name,student_number) values(?,?)", line1,line2);
+				//studentテーブル内にline2と同じものが存在していなければ，studentテーブルへ書き込む（新規登録）
+				let number_flag = 0;
+				// @ts-ignore
+				db.each("select * from student", (err, row) => {
+					if (err) {
+						console.log(err);
+					}
+					
+					if (row.student_number=line2){
+						number_flag = 1;
+					}
+					console.log(`${row.student_number}`);
+				});
+				if(number_flag=1){
+					db.run("insert into student(student_name,student_number) values(?,?)", line1,line2);
+				}else{
+					//line2=student_numberとなるデータを抽出，student_idを取得するプログラム
+				}
+				number_flag=0;
 
 				// db.run("insert into tries(content) values(?)", text);
 				// @ts-ignore
