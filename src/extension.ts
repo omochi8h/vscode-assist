@@ -18,7 +18,7 @@ const { PythonShell } = require('python-shell');
 // console.log(PythonShell);
 // nodejsとpythonの連携がうまくいかない
 // @ts-ignore
-PythonShell.run('my_script.py', null, function (err) {
+PythonShell.run('assist_python/my_script.py', null, function (err) {
 	if (err) {
 		console.log('finished');
 		console.log(err);
@@ -59,13 +59,10 @@ export function activate(context: vscode.ExtensionContext) {
 			vscode.window.showInformationMessage(`textは${text}`);
 
 			//ソースコードのn-1行目を取得する
-			let cuttext = text.split(/\r\n|\r|\n/)[1];
-			console.log(cuttext);
+			let line1 = text.split(/\r\n|\r|\n/)[0];
+			let line2 = text.split(/\r\n|\r|\n/)[1];
 
 			
-			
-
-
 
 			// db.run('INSERT INTO tries (content) VALUES (?)', 'できてるかなあ');
 			// let content :string = "";
@@ -75,7 +72,9 @@ export function activate(context: vscode.ExtensionContext) {
 
 			db.serialize(() => {
 
-				db.run("insert into tries(content) values(?)", text);
+				db.run("insert into student(student_name,student_number) values(?,?)", line1,line2);
+
+				// db.run("insert into tries(content) values(?)", text);
 				// @ts-ignore
 				// db.get('SELECT content FROM tries', function(err, row) {
 				// 	if (err) {
@@ -84,11 +83,11 @@ export function activate(context: vscode.ExtensionContext) {
 				// 	console.log(row.content);
 				// 	console.log('できてる？');
 				// });
-				db.each("select * from tries", (err, row) => {
+				db.each("select * from student", (err, row) => {
 					if (err) {
 						console.log(err);
 					}
-					console.log(`${row.content}`);
+					console.log(`${row.student_number}`);
 				});
 
 			});
