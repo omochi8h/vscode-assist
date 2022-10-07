@@ -61,7 +61,25 @@ export function activate(context: vscode.ExtensionContext) {
 			//ソースコードのn-1行目を取得する
 			let line1 = text.split(/\r\n|\r|\n/)[0];
 			let line2 = text.split(/\r\n|\r|\n/)[1];
-
+			// 先頭から2文字を削除
+			let number = line1.slice(2);
+			let name = line2.slice(2);
+			
+			// input.cに解答プログラムの書き込み.例のごとくC:\Users\stude\AppData\Local\Programs\Microsoft VS Codeに置かれてしまう．
+			// @ts-ignore
+			const removeHeads = (s, n) => s.split('\n').slice(n).join('\n')
+			text = removeHeads(text, 2)
+			const fs = require("fs");
+			const data = text;
+			// @ts-ignore
+			fs.writeFile("input.c", data, (err) => {
+			if (err) throw err;
+				console.log('正常に書き込みが完了しました');
+			});
+			//時間取得
+			const moment = require('moment');
+			const currentTime = moment();
+			console.log(currentTime.format("YYYYMMDDHHmmss"));
 			
 
 			// db.run('INSERT INTO tries (content) VALUES (?)', 'できてるかなあ');
@@ -74,39 +92,36 @@ export function activate(context: vscode.ExtensionContext) {
 
 				//studentテーブル内にline2と同じものが存在していなければ，studentテーブルへ書き込む（新規登録）
 				let number_flag = 0;
+				let id = 0;
 				// @ts-ignore
 				db.each("select * from student", (err, row) => {
 					if (err) {
 						console.log(err);
 					}
-					
-					if (row.student_number=line2){
+					if (number==row.student_number){
 						number_flag = 1;
+						id = row.student_id;
+						console.log('OK!!');
 					}
-					console.log(`${row.student_number}`);
+					console.log(`numberは${number}`);
+					console.log(`studentは${row.student_number}`);
+					console.log(`idは${row.student_id}`);
 				});
-				if(number_flag=1){
-					db.run("insert into student(student_name,student_number) values(?,?)", line1,line2);
-				}else{
+
+				if(number_flag==1){
 					//line2=student_numberとなるデータを抽出，student_idを取得するプログラム
+					console.log(`追加しません`);
+				}else{
+					// @ts-ignore
+					connection.query("insert into student(student_name,student_number) values(?,?)", name,number, function(err, result) {
+						if (err) throw err;
+					  
+						console.log(result.student_id);
+					  });
+					// db.run("insert into student(student_name,student_number) values(?,?)", name,number);
+				
 				}
 				number_flag=0;
-
-				// db.run("insert into tries(content) values(?)", text);
-				// @ts-ignore
-				// db.get('SELECT content FROM tries', function(err, row) {
-				// 	if (err) {
-				// 		console.log(err)
-				// 	}
-				// 	console.log(row.content);
-				// 	console.log('できてる？');
-				// });
-				db.each("select * from student", (err, row) => {
-					if (err) {
-						console.log(err);
-					}
-					console.log(`${row.student_number}`);
-				});
 
 			});
 			
